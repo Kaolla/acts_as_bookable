@@ -5,6 +5,7 @@ module ActsAsBookable
   class Booking < ::ActiveRecord::Base
     self.table_name = 'acts_as_bookable_bookings'
 
+    enum status: [:pending, :accepted, :rejected]
     belongs_to :bookable, polymorphic: true
     belongs_to :booker,   polymorphic: true
 

@@ -5,6 +5,7 @@ class CreateActsAsBookableBookings < ActiveRecord::Migration[6.0]
       t.references :booker, polymorphic: true, index: {name: "index_acts_as_bookable_bookings_booker"}
       t.column :amount, :integer
       t.column :schedule, :text
+      t.integer :status, default: 0
       t.column :time_start, :datetime
       t.column :time_end, :datetime
       t.column :time, :datetime
