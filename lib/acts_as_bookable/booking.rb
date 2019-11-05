@@ -14,7 +14,7 @@ module ActsAsBookable
     validate  :bookable_must_be_bookable,
               :booker_must_be_booker
 
-    validates :amount, numericality: { only_interger: true }, greater_than: 0
+    validates :amount, numericality: { only_interger: true, greater_than: 0 }
 
     ##
     # Retrieves overlapped bookings, given a bookable and some booking options
