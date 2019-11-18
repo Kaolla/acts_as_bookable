@@ -56,17 +56,17 @@ describe 'Bookable model' do
       it 'should be available in bookable times' do
         time = '2016-01-01'.to_date
         endtime = time + 10.minutes
-        expect(@bookable.check_availability!({time_start: time, time_end: endtime})).to be_truthy
-        expect(@bookable.check_availability({time_start: time, time_end: endtime})).to be_truthy
+        expect(@bookable.check_availability!({start_time: time, end_time: endtime})).to be_truthy
+        expect(@bookable.check_availability({start_time: time, end_time: endtime})).to be_truthy
       end
 
       it 'should not be available in not bookable times' do
         time = '2016-01-02'.to_date
         endtime = '2016-01-04'.to_date
-        expect(@bookable.check_availability({time_start: time, time_end: endtime})).to be_falsy
-        expect{ @bookable.check_availability!({time_start: time, time_end: endtime}) }.to raise_error ActsAsBookable::AvailabilityError
+        expect(@bookable.check_availability({start_time: time, end_time: endtime})).to be_falsy
+        expect{ @bookable.check_availability!({start_time: time, end_time: endtime}) }.to raise_error ActsAsBookable::AvailabilityError
         begin
-          @bookable.check_availability!({time_start: time, time_end: endtime})
+          @bookable.check_availability!({start_time: time, end_time: endtime})
         rescue ActsAsBookable::AvailabilityError => e
           expect(e.message).to include "the Bookable is not available from #{time.to_time} to #{endtime.to_time}"
         end
@@ -75,24 +75,24 @@ describe 'Bookable model' do
       it 'should be bookable within a bookable time' do
         time = '2016-01-01'.to_date + 1.minute
         endtime = '2016-01-02'.to_date - 1.minute
-        expect(@bookable.check_availability!({time_start: time, time_end: endtime})).to be_truthy
-        expect(@bookable.check_availability({time_start: time, time_end: endtime})).to be_truthy
+        expect(@bookable.check_availability!({start_time: time, end_time: endtime})).to be_truthy
+        expect(@bookable.check_availability({start_time: time, end_time: endtime})).to be_truthy
       end
 
       it 'should be bookable within a bookable time' do
         time = '2016-01-01'.to_date + 1.minute
         endtime = '2016-01-02'.to_date - 1.minute
-        expect(@bookable.check_availability!({time_start: time, time_end: endtime})).to be_truthy
-        expect(@bookable.check_availability({time_start: time, time_end: endtime})).to be_truthy
+        expect(@bookable.check_availability!({start_time: time, end_time: endtime})).to be_truthy
+        expect(@bookable.check_availability({start_time: time, end_time: endtime})).to be_truthy
       end
 
-      it 'should not be available when time_start is available, time_end is available but the availability is splitted in between' do
+      it 'should not be available when start_time is available, end_time is available but the availability is splitted in between' do
         time = '2016-01-01'.to_date + 1.minute
         endtime = '2016-01-03'.to_date + 1.minute
-        expect(@bookable.check_availability({time_start: time, time_end: endtime})).to be_falsy
-        expect{ @bookable.check_availability!({time_start: time, time_end: endtime}) }.to raise_error ActsAsBookable::AvailabilityError
+        expect(@bookable.check_availability({start_time: time, end_time: endtime})).to be_falsy
+        expect{ @bookable.check_availability!({start_time: time, end_time: endtime}) }.to raise_error ActsAsBookable::AvailabilityError
         begin
-          @bookable.check_availability!({time_start: time, time_end: endtime})
+          @bookable.check_availability!({start_time: time, end_time: endtime})
         rescue ActsAsBookable::AvailabilityError => e
           expect(e.message).to include "the Bookable is not available from #{time} to #{endtime}"
         end
@@ -116,17 +116,17 @@ describe 'Bookable model' do
       it 'should be available in bookable times' do
         time = '2016-01-01'.to_date
         endtime = time + 10.minutes
-        expect(@bookable.check_availability!({time_start: time, time_end: endtime})).to be_truthy
-        expect(@bookable.check_availability({time_start: time, time_end: endtime})).to be_truthy
+        expect(@bookable.check_availability!({start_time: time, end_time: endtime})).to be_truthy
+        expect(@bookable.check_availability({start_time: time, end_time: endtime})).to be_truthy
       end
 
       it 'should not be available in not bookable times' do
         time = '2016-01-02'.to_date
         endtime = '2016-01-04'.to_date
-        expect(@bookable.check_availability({time_start: time, time_end: endtime})).to be_falsy
-        expect{ @bookable.check_availability!({time_start: time, time_end: endtime}) }.to raise_error ActsAsBookable::AvailabilityError
+        expect(@bookable.check_availability({start_time: time, end_time: endtime})).to be_falsy
+        expect{ @bookable.check_availability!({start_time: time, end_time: endtime}) }.to raise_error ActsAsBookable::AvailabilityError
         begin
-          @bookable.check_availability!({time_start: time, time_end: endtime})
+          @bookable.check_availability!({start_time: time, end_time: endtime})
         rescue ActsAsBookable::AvailabilityError => e
           expect(e.message).to include "the Bookable is not available from #{time.to_time} to #{endtime.to_time}"
         end
@@ -135,22 +135,22 @@ describe 'Bookable model' do
       it 'should be bookable within a bookable time' do
         time = '2016-01-01'.to_date + 1.minute
         endtime = '2016-01-02'.to_date - 1.minute
-        expect(@bookable.check_availability!({time_start: time, time_end: endtime})).to be_truthy
-        expect(@bookable.check_availability({time_start: time, time_end: endtime})).to be_truthy
+        expect(@bookable.check_availability!({start_time: time, end_time: endtime})).to be_truthy
+        expect(@bookable.check_availability({start_time: time, end_time: endtime})).to be_truthy
       end
 
       it 'should be bookable within a bookable time' do
         time = '2016-01-01'.to_date + 1.minute
         endtime = '2016-01-02'.to_date - 1.minute
-        expect(@bookable.check_availability!({time_start: time, time_end: endtime})).to be_truthy
-        expect(@bookable.check_availability({time_start: time, time_end: endtime})).to be_truthy
+        expect(@bookable.check_availability!({start_time: time, end_time: endtime})).to be_truthy
+        expect(@bookable.check_availability({start_time: time, end_time: endtime})).to be_truthy
       end
 
-      it 'should be available when time_start is available, time_end is available and the availability is splitted in between' do
+      it 'should be available when start_time is available, end_time is available and the availability is splitted in between' do
         time = '2016-01-01'.to_date + 1.minute
         endtime = '2016-01-03'.to_date + 1.minute
-        expect(@bookable.check_availability({time_start: time, time_end: endtime})).to be_truthy
-        expect(@bookable.check_availability!({time_start: time, time_end: endtime})).to be_truthy
+        expect(@bookable.check_availability({start_time: time, end_time: endtime})).to be_truthy
+        expect(@bookable.check_availability!({start_time: time, end_time: endtime})).to be_truthy
       end
     end
 
@@ -271,11 +271,11 @@ describe 'Bookable model' do
         @bookable.schedule.add_recurrence_rule IceCube::Rule.daily
         @bookable.save!
         booker = create(:booker)
-        @bookable.be_booked!(booker, amount: 3, time_start: Date.today, time_end: Date.today + 8.hours)
-        @bookable.be_booked!(booker, amount: 3, time_start: Date.today + 8.hours, time_end: Date.today + 16.hours)
-        @bookable.be_booked!(booker, amount: 3, time_start: Date.today + 16.hours, time_end: Date.today + 24.hours)
+        @bookable.be_booked!(booker, amount: 3, start_time: Date.today, end_time: Date.today + 8.hours)
+        @bookable.be_booked!(booker, amount: 3, start_time: Date.today + 8.hours, end_time: Date.today + 16.hours)
+        @bookable.be_booked!(booker, amount: 3, start_time: Date.today + 16.hours, end_time: Date.today + 24.hours)
         amount = 1
-        expect(@bookable.check_availability(amount: amount, time_start: Date.today, time_end: Date.today + 24.hours)).to be_truthy
+        expect(@bookable.check_availability(amount: amount, start_time: Date.today, end_time: Date.today + 24.hours)).to be_truthy
       end
 
       it 'should not be available if amount <= capacity and already booked and amount > conditional capacity' do
@@ -289,14 +289,14 @@ describe 'Bookable model' do
         @bookable.schedule.add_recurrence_rule IceCube::Rule.daily
         @bookable.save!
         booker = create(:booker)
-        @bookable.be_booked!(booker, amount: 3, time_start: Date.today, time_end: Date.today + 8.hours)
-        @bookable.be_booked!(booker, amount: 3, time_start: Date.today + 8.hours, time_end: Date.today + 16.hours)
-        @bookable.be_booked!(booker, amount: 1, time_start: Date.today + 8.hours, time_end: Date.today + 24.hours)
+        @bookable.be_booked!(booker, amount: 3, start_time: Date.today, end_time: Date.today + 8.hours)
+        @bookable.be_booked!(booker, amount: 3, start_time: Date.today + 8.hours, end_time: Date.today + 16.hours)
+        @bookable.be_booked!(booker, amount: 1, start_time: Date.today + 8.hours, end_time: Date.today + 24.hours)
         amount = 2
-        expect(@bookable.check_availability(amount: amount, time_start: Date.today, time_end: Date.today + 8.hours)).to be_truthy
-        expect(@bookable.check_availability(amount: amount, time_start: Date.today + 8.hours, time_end: Date.today + 16.hours)).to be_truthy
-        expect(@bookable.check_availability(amount: amount, time_start: Date.today + 16.hours, time_end: Date.today + 24.hours)).to be_truthy
-        expect(@bookable.check_availability(amount: amount, time_start: Date.today, time_end: Date.today + 24.hours)).to be_truthy
+        expect(@bookable.check_availability(amount: amount, start_time: Date.today, end_time: Date.today + 8.hours)).to be_truthy
+        expect(@bookable.check_availability(amount: amount, start_time: Date.today + 8.hours, end_time: Date.today + 16.hours)).to be_truthy
+        expect(@bookable.check_availability(amount: amount, start_time: Date.today + 16.hours, end_time: Date.today + 24.hours)).to be_truthy
+        expect(@bookable.check_availability(amount: amount, start_time: Date.today, end_time: Date.today + 24.hours)).to be_truthy
       end
     end
 
@@ -463,25 +463,25 @@ describe 'Bookable model' do
           before(:each) do
             Bookable.booking_opts[:time_type] = :range
             Bookable.initialize_acts_as_bookable_core
-            @opts[:time_start] = Time.now + 1.hour
-            @opts[:time_end] = Time.now + 4.hours
+            @opts[:start_time] = Time.now + 1.hour
+            @opts[:end_time] = Time.now + 4.hours
           end
 
           it 'validates with all options fields set' do
             expect(Bookable.validate_booking_options!(@opts)).to be_truthy
           end
 
-          it 'requires time_start as Time' do
-            @opts[:time_start] = nil
+          it 'requires start_time as Time' do
+            @opts[:start_time] = nil
             expect{ Bookable.validate_booking_options!(@opts) }.to raise_error ActsAsBookable::OptionsInvalid
-            @opts[:time_start] = 'String'
+            @opts[:start_time] = 'String'
             expect{ Bookable.validate_booking_options!(@opts) }.to raise_error ActsAsBookable::OptionsInvalid
           end
 
-          it 'requires time_end as Time' do
-            @opts[:time_end] = nil
+          it 'requires end_time as Time' do
+            @opts[:end_time] = nil
             expect{ Bookable.validate_booking_options!(@opts) }.to raise_error ActsAsBookable::OptionsInvalid
-            @opts[:time_end] = 'String'
+            @opts[:end_time] = 'String'
             expect{ Bookable.validate_booking_options!(@opts) }.to raise_error ActsAsBookable::OptionsInvalid
           end
 
@@ -509,13 +509,13 @@ describe 'Bookable model' do
             expect{ Bookable.validate_booking_options!(@opts) }.to raise_error ActsAsBookable::OptionsInvalid
           end
 
-          it 'doesn\'t accept time_start' do
-            @opts[:time_start] = Time.now + 13
+          it 'doesn\'t accept start_time' do
+            @opts[:start_time] = Time.now + 13
             expect{ Bookable.validate_booking_options!(@opts) }.to raise_error ActsAsBookable::OptionsInvalid
           end
 
-          it 'doesn\'t accept time_end' do
-            @opts[:time_end] = Time.now + 15
+          it 'doesn\'t accept end_time' do
+            @opts[:end_time] = Time.now + 15
             expect{ Bookable.validate_booking_options!(@opts) }.to raise_error ActsAsBookable::OptionsInvalid
           end
         end
@@ -530,13 +530,13 @@ describe 'Bookable model' do
             expect{ Bookable.validate_booking_options!(@opts) }.to raise_error ActsAsBookable::OptionsInvalid
           end
 
-          it 'doesn\'t accept time_start' do
-            @opts[:time_start] = Time.now + 13
+          it 'doesn\'t accept start_time' do
+            @opts[:start_time] = Time.now + 13
             expect{ Bookable.validate_booking_options!(@opts) }.to raise_error ActsAsBookable::OptionsInvalid
           end
 
-          it 'doesn\'t accept time_end' do
-            @opts[:time_end] = Time.now + 15
+          it 'doesn\'t accept end_time' do
+            @opts[:end_time] = Time.now + 15
             expect{ Bookable.validate_booking_options!(@opts) }.to raise_error ActsAsBookable::OptionsInvalid
           end
         end

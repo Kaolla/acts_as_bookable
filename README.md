@@ -176,7 +176,7 @@ time_wrong = Date.today + 19.hours # Today at 7PM
 
 > WARNING - **migration needed!** - with this option the model must have an attribute `schedule: :text`
 
-The model accepts bookings that specify a `:time_start` and a `:time_end`. After a booking is created, the bookable availability is affected only within that range. (e.g. a meeting room)
+The model accepts bookings that specify a `:start_time` and a `:end_time`. After a booking is created, the bookable availability is affected only within that range. (e.g. a meeting room)
 
 **Configuration**
 
@@ -209,9 +209,9 @@ to_ok = from_ok + 2.hours
 from_wrong = Date.today.next_week + 1.day + 9.hours
 to_wrong = from_wrong + 2.hours
 
-# Booking a model with `time_type: :range` requires `:time_start` and `:time_end`
-@user1.book! @meeting_room, time_start: from_ok, time_end: to_ok # OK
-@user2.book! @meeting_room, time_start: from_wrong, time_end: to_wrong # raise ActsAsBookable::AvailabilityError
+# Booking a model with `time_type: :range` requires `:start_time` and `:end_time`
+@user1.book! @meeting_room, start_time: from_ok, end_time: to_ok # OK
+@user2.book! @meeting_room, start_time: from_wrong, end_time: to_wrong # raise ActsAsBookable::AvailabilityError
 ```
 
 ### Bookability across occurrences
@@ -256,11 +256,11 @@ to_ok = from_ok + 2.hours
 from_wrong = Date.today.next_week + 11.hours
 to_wrong = Date.today.next_week + 18.hours
 
-# OK - time_start and time_end belong to the same occurrence
-@user1.book! @meeting_room, time_start: from_ok, time_end: to_ok
+# OK - start_time and end_time belong to the same occurrence
+@user1.book! @meeting_room, start_time: from_ok, end_time: to_ok
 
-# raise ActsAsBookable::AvailabilityError - both time_start and time_end are inside the schedule, but they belong to different occurrences
-@user2.book! @meeting_room, time_start: from_wrong, time_end: to_wrong
+# raise ActsAsBookable::AvailabilityError - both start_time and end_time are inside the schedule, but they belong to different occurrences
+@user2.book! @meeting_room, start_time: from_wrong, end_time: to_wrong
 ```
 
 #### Bookable across occurrences **`bookable_across_occurrences: true`**
@@ -298,11 +298,11 @@ check_out_ok = check_in_ok + 2.days
 check_in_wrong = Date.today.next_week + 4.days
 check_out_wrong = check_in_wrong + 3.days
 
-# OK - time_start and time_end belong to different occurrences
-@user1.book! @room, time_start: check_in_ok, time_end: check_out_ok
+# OK - start_time and end_time belong to different occurrences
+@user1.book! @room, start_time: check_in_ok, end_time: check_out_ok
 
-# raise ActsAsBookable::AvailabilityError - while time_end belongs to an occurrence, time_begin doesn't belong to any occurrence of the schedule
-@user2.book! @room, time_start: check_in_wrong, time_end: check_out_wrong
+# raise ActsAsBookable::AvailabilityError - while end_time belongs to an occurrence, time_begin doesn't belong to any occurrence of the schedule
+@user2.book! @room, start_time: check_in_wrong, end_time: check_out_wrong
 ```
 
 ### Capacity constraints
@@ -435,7 +435,7 @@ end
 
 ```ruby
 # A @user books a @room for 2 people. Check-in is today and check-out is tomorrow.
-@user.book! @room, time_start: Date.today, time_end: Date.tomorrow, amount: 2
+@user.book! @room, start_time: Date.today, end_time: Date.tomorrow, amount: 2
 ```
 
 ## FYI

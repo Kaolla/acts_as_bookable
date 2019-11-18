@@ -26,11 +26,11 @@ module ActsAsBookable
       if(opts[:time].present?)
         query = DBUtils.time_comparison(query,'time','=',opts[:time])
       end
-      if(opts[:time_start].present?)
-        query = DBUtils.time_comparison(query,'time_end', '>=', opts[:time_start])
+      if(opts[:start_time].present?)
+        query = DBUtils.time_comparison(query,'end_time', '>=', opts[:start_time])
       end
-      if(opts[:time_end].present?)
-        query = DBUtils.time_comparison(query,'time_start', '<', opts[:time_end])
+      if(opts[:end_time].present?)
+        query = DBUtils.time_comparison(query,'start_time', '<', opts[:end_time])
       end
       query
     }

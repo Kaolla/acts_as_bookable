@@ -31,18 +31,18 @@ module ActsAsBookable::Bookable
 
         # Switch :time_type
         case self.booking_opts[:time_type]
-        # when :range, we need :time_start and :time_end
+        # when :range, we need :start_time and :end_time
         when :range
-          required_params[:time_start] = [Time,Date]
-          required_params[:time_end] = [Time,Date]
+          required_params[:start_time] = [Time,Date]
+          required_params[:end_time] = [Time,Date]
           unpermitted_params << :time
         when :fixed
           required_params[:time] = [Time,Date]
-          unpermitted_params << :time_start
-          unpermitted_params << :time_end
+          unpermitted_params << :start_time
+          unpermitted_params << :end_time
         when :none
-          unpermitted_params << :time_start
-          unpermitted_params << :time_end
+          unpermitted_params << :start_time
+          unpermitted_params << :end_time
           unpermitted_params << :time
         end
 
@@ -83,8 +83,8 @@ module ActsAsBookable::Bookable
         #
         # Convert options (Date to Time)
         #
-        options[:time_start] = options[:time_start].to_time if options[:time_start].present?
-        options[:time_end] = options[:time_end].to_time if options[:time_end].present?
+        options[:start_time] = options[:start_time].to_time if options[:start_time].present?
+        options[:end_time] = options[:end_time].to_time if options[:end_time].present?
         options[:time] = options[:time].to_time if options[:time].present?
 
         # Return true if everything's ok
@@ -120,9 +120,9 @@ module ActsAsBookable::Bookable
           # Room preset
           when :room
             defaults = {
-              time_type: :range,      # time_start is check-in, time_end is check-out
+              time_type: :range,      # start_time is check-in, end_time is check-out
               capacity_type: :closed,  # capacity is closed: after the first booking the room is not bookable anymore, even though the capacity has not been reached
-              bookable_across_occurrences: true # a room is bookable across recurrences: if a recurrence is daily, a booker must be able to book from a date to another date, even though time_start and time_end falls in different occurrences of the schedule
+              bookable_across_occurrences: true # a room is bookable across recurrences: if a recurrence is daily, a booker must be able to book from a date to another date, even though start_time and end_time falls in different occurrences of the schedule
             }
           # Event preset (e.g. a birthday party)
           when :event
@@ -181,27 +181,27 @@ module ActsAsBookable::Bookable
           # If it's bookable across recurrences, just check start time and end time
           if self.booking_opts[:bookable_across_occurrences]
             # Check start time
-            if !(ActsAsBookable::TimeUtils.time_in_schedule?(self.schedule, opts[:time_start]))
+            if !(ActsAsBookable::TimeUtils.time_in_schedule?(self.availabilities, opts[:start_time]))
               time_check_ok = false
             end
             # Check end time
-            if !(ActsAsBookable::TimeUtils.time_in_schedule?(self.schedule, opts[:time_end]))
+            if !(ActsAsBookable::TimeUtils.time_in_schedule?(self.availabilities, opts[:end_time]))
               time_check_ok = false
             end
           # If it's not bookable across recurrences, check if the whole interval is included in an occurrence
           else
             # Check the whole interval
-            if !(ActsAsBookable::TimeUtils.interval_in_schedule?(self.schedule, opts[:time_start], opts[:time_end]))
+            if !(ActsAsBookable::TimeUtils.interval_in_schedule?(self.availabilities, opts[:start_time], opts[:end_time]))
               time_check_ok = false
             end
           end
           # If something went wrong
           unless time_check_ok
-            raise ActsAsBookable::AvailabilityError.new ActsAsBookable::T.er('.availability.unavailable_interval', model: self.class.to_s, time_start: opts[:time_start], time_end: opts[:time_end])
+            raise ActsAsBookable::AvailabilityError.new ActsAsBookable::T.er('.availability.unavailable_interval', model: self.class.to_s, start_time: opts[:start_time], end_time: opts[:end_time])
           end
         end
         if self.booking_opts[:time_type] == :fixed
-          if !(ActsAsBookable::TimeUtils.time_in_schedule?(self.schedule, opts[:time]))
+          if !(ActsAsBookable::TimeUtils.time_in_schedule?(self.availabilities, opts[:time]))
             raise ActsAsBookable::AvailabilityError.new ActsAsBookable::T.er('.availability.unavailable_time', model: self.class.to_s, time: opts[:time])
           end
         end
@@ -211,7 +211,8 @@ module ActsAsBookable::Bookable
         #
         overlapped = ActsAsBookable::Booking.overlapped(self, opts)
         # If capacity_type is :closed cannot book if already booked (no matter if amount < capacity)
-        if (self.booking_opts[:capacity_type] == :closed && !overlapped.empty? && self.accepted?)
+        if (self.booking_opts[:capacity_type] == :closed && !overlapped.empty?)
+          byebug
           raise ActsAsBookable::AvailabilityError.new ActsAsBookable::T.er('.availability.already_booked', model: self.class.to_s)
         end
         # if capacity_type is :open, check if amount <= maximum amount of overlapped booking
@@ -219,7 +220,7 @@ module ActsAsBookable::Bookable
           # if time_type is :range, split in sub-intervals and check the maximum sum of amounts against capacity for each sub-interval
           if (self.booking_opts[:time_type] == :range)
             # Map overlapped bookings to a set of intervals with amount
-            intervals = overlapped.map { |e| {time_start: e.time_start, time_end: e.time_end, amount: e.amount} }
+            intervals = overlapped.map { |e| {start_time: e.start_time, end_time: e.end_time, amount: e.amount} }
             # Make subintervals from overlapped bookings and check capacity for each of them
             ActsAsBookable::TimeUtils.subintervals(intervals) do |a,b,op|
               case op

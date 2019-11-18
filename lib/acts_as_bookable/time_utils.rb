@@ -24,20 +24,26 @@ module ActsAsBookable
       # @param interval_end The ending Time of the interval
       # @return true if the interval falls within an occurrence of the schedule, otherwise false
       #
-      def interval_in_schedule?(schedule, interval_start, interval_end)
-        # Check if interval_start and interval_end falls within any occurrence
-        return false if(!time_in_schedule?(schedule,interval_start) || !time_in_schedule?(schedule,interval_end))
+      def interval_in_schedule?(availabilities, interval_start, interval_end)
 
+        # Check if interval_start and interval_end falls within any occurrence
+        return false if(!time_in_schedule?(availabilities,interval_start) || !time_in_schedule?(availabilities,interval_end))
+
+        
         # Check if both interval_start and interval_end falls within the SAME occurrence
-        between = schedule.occurrences_between(interval_start, interval_end, true)
-        contains = false
-        between.each do |oc|
-          oc_end = oc + schedule.duration
-          contains = true if (time_in_interval?(interval_start,oc,oc_end) && time_in_interval?(interval_end,oc,oc_end))
-          break if contains
+        availabilities.each do |availability|
+          schedule = IceCube::Schedule.from_yaml(availability.schedule)
+          between = schedule.occurrences_between(interval_start, interval_end, spans: true)
+
+          contains = false
+          between.each do |oc|
+            oc_end = oc + schedule.duration
+            contains = true if (time_in_interval?(interval_start,oc,oc_end) && time_in_interval?(interval_end,oc,oc_end))
+            break if contains
+          end
+          contains
         end
 
-        contains
       end
 
       ##
@@ -46,17 +52,20 @@ module ActsAsBookable
       # @param time The time
       # @return true if the time falls within an occurrence of the schedule, otherwise false
       #
-      def time_in_schedule?(schedule, time)
-        return schedule.occurring_at? time
+      def time_in_schedule?(availabilities, time)
+        availabilities.each do |availability|
+          schedule = IceCube::Schedule.from_yaml(availability.schedule)
+          return schedule.occurring_at? time
+        end
       end
 
       ##
       # Returns an array of sub-intervals given another array of intervals, which are the overlapping insersections of each-others.
       #
       # @param intervals an array of intervals
-      # @return an array of subintervals, sorted by time_start
+      # @return an array of subintervals, sorted by start_time
       #
-      # An interval is defined as a hash with at least the following fields: `time_from` and `time_end`. An interval may contain more
+      # An interval is defined as a hash with at least the following fields: `time_from` and `end_time`. An interval may contain more
       # fields. In that case, it's suggested to give a block with the instructions to correctly merge two intervals when needed.
       #
       # e.g: given these 7 intervals
@@ -82,16 +91,16 @@ module ActsAsBookable
         # Extract start times and end times from intervals, and create steps
         intervals.each do |el|
           begin
-            ts = el[:time_start].to_time
-            te = el[:time_end].to_time
+            ts = el[:start_time].to_time
+            te = el[:end_time].to_time
           rescue NoMethodError
-            raise ArgumentError.new('intervals must define :time_start and :time_end as Time or Date')
+            raise ArgumentError.new('intervals must define :start_time and :end_time as Time or Date')
           end
           attrs = el.clone
-          attrs.delete(:time_start)
-          attrs.delete(:time_end)
-          steps << { opening: 1, time: el[:time_start], attrs: attrs } # Start step
-          steps << { opening: -1, time: el[:time_end], attrs: attrs.clone } # End step
+          attrs.delete(:start_time)
+          attrs.delete(:end_time)
+          steps << { opening: 1, time: el[:start_time], attrs: attrs } # Start step
+          steps << { opening: -1, time: el[:end_time], attrs: attrs.clone } # End step
         end
 
         # Sort steps by time (and opening if time is the same)
@@ -109,8 +118,8 @@ module ActsAsBookable
           else
             if(step[:time] > last_time)
               subintervals << ({
-                time_start: last_time,
-                time_end: step[:time]
+                start_time: last_time,
+                end_time: step[:time]
               }.merge(last_attrs))
 
               last_time = step[:time]
