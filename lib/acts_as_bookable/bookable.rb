@@ -32,7 +32,7 @@ module ActsAsBookable
 
           has_many :bookings, as: :bookable, dependent: :destroy, class_name: '::ActsAsBookable::Booking'
 
-          validates_presence_of :schedule, if: :schedule_required?
+          # validates_presence_of :availabilities, if: :availabilities_required?
           validates_presence_of :capacity, if: :capacity_required?
           validates_numericality_of :capacity, if: :capacity_required?, only_integer: true, greater_than_or_equal_to: 0
 
@@ -40,7 +40,7 @@ module ActsAsBookable
             true
           end
 
-          def schedule_required?
+          def availabilities_required?
             self.booking_opts && self.booking_opts && self.booking_opts[:time_type] != :none
           end
 

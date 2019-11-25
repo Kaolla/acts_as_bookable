@@ -212,7 +212,6 @@ module ActsAsBookable::Bookable
         overlapped = ActsAsBookable::Booking.overlapped(self, opts)
         # If capacity_type is :closed cannot book if already booked (no matter if amount < capacity)
         if (self.booking_opts[:capacity_type] == :closed && !overlapped.empty?)
-          byebug
           raise ActsAsBookable::AvailabilityError.new ActsAsBookable::T.er('.availability.already_booked', model: self.class.to_s)
         end
         # if capacity_type is :open, check if amount <= maximum amount of overlapped booking

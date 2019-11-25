@@ -5,16 +5,18 @@ module ActsAsBookable
   class Booking < ::ActiveRecord::Base
     self.table_name = 'acts_as_bookable_bookings'
 
-    enum status: [:pending, :accepted, :rejected]
+    enum status: [:draft, :pending, :accepted, :rejected]
     belongs_to :bookable, polymorphic: true
     belongs_to :booker,   polymorphic: true
-
+    
     validates_presence_of :bookable
     validates_presence_of :booker
     validate  :bookable_must_be_bookable,
               :booker_must_be_booker
 
     validates :amount, numericality: { only_interger: true, greater_than: 0 }
+
+    scope :saved, -> { where.not(status: "draft") }
 
     ##
     # Retrieves overlapped bookings, given a bookable and some booking options
@@ -34,6 +36,10 @@ module ActsAsBookable
       end
       query
     }
+
+    def pricing
+      self.symbolize_keys
+    end
 
     private
       ##
