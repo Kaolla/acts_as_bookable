@@ -28,22 +28,17 @@ module ActsAsBookable
 
         # Check if interval_start and interval_end falls within any occurrence
         return false if(!time_in_schedule?(availabilities,interval_start) || !time_in_schedule?(availabilities,interval_end))
-
         
         # Check if both interval_start and interval_end falls within the SAME occurrence
         availabilities.each do |availability|
           schedule = IceCube::Schedule.from_yaml(availability.schedule)
           between = schedule.occurrences_between(interval_start, interval_end, spans: true)
 
-          contains = false
           between.each do |oc|
-            oc_end = oc + schedule.duration
-            contains = true if (time_in_interval?(interval_start,oc,oc_end) && time_in_interval?(interval_end,oc,oc_end))
-            break if contains
+            oc_end = (oc + schedule.duration) || schedule.end_time
+            return (time_in_interval?(interval_start,oc,oc_end) && time_in_interval?(interval_end,oc,oc_end)) ? true : false
           end
-          contains
         end
-
       end
 
       ##
@@ -55,7 +50,7 @@ module ActsAsBookable
       def time_in_schedule?(availabilities, time)
         availabilities.each do |availability|
           schedule = IceCube::Schedule.from_yaml(availability.schedule)
-          return schedule.occurring_at? time
+          return schedule.occurring_at? time ? true : false
         end
       end
 
