@@ -5,7 +5,7 @@ module ActsAsBookable
   class Booking < ::ActiveRecord::Base
     self.table_name = 'acts_as_bookable_bookings'
 
-    enum status: [:draft, :pending, :accepted, :rejected]
+    enum status: [:draft, :pending, :accepted, :rejected, :paid, :refunded]
     belongs_to :bookable, polymorphic: true
     belongs_to :booker,   polymorphic: true
     
@@ -36,10 +36,6 @@ module ActsAsBookable
       end
       query
     }
-
-    def pricing
-      self.symbolize_keys
-    end
 
     private
       ##
