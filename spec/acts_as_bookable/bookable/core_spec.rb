@@ -221,46 +221,46 @@ describe 'Bookable model' do
         @bookable = Bookable.create!(name: 'bookable', capacity: 4)
       end
 
-      it 'should be available if amount <= capacity' do
-        (1..@bookable.capacity).each do |amount|
-          expect(@bookable.check_availability(amount: amount)).to be_truthy
-          expect(@bookable.check_availability!(amount: amount)).to be_truthy
+      it 'should be available if quantity <= capacity' do
+        (1..@bookable.capacity).each do |quantity|
+          expect(@bookable.check_availability(quantity: quantity)).to be_truthy
+          expect(@bookable.check_availability!(quantity: quantity)).to be_truthy
         end
       end
 
-      it 'should not be available if amount > capacity' do
-        expect(@bookable.check_availability(amount: @bookable.capacity + 1)).to be_falsy
-        expect { @bookable.check_availability!(amount: @bookable.capacity + 1) }.to raise_error ActsAsBookable::AvailabilityError
+      it 'should not be available if quantity > capacity' do
+        expect(@bookable.check_availability(quantity: @bookable.capacity + 1)).to be_falsy
+        expect { @bookable.check_availability!(quantity: @bookable.capacity + 1) }.to raise_error ActsAsBookable::AvailabilityError
         begin
-          @bookable.check_availability!(amount: @bookable.capacity + 1)
+          @bookable.check_availability!(quantity: @bookable.capacity + 1)
         rescue ActsAsBookable::AvailabilityError => e
           expect(e.message).to include 'cannot be greater'
         end
       end
 
-      it 'should be available if already booked but amount <= conditional capacity' do
+      it 'should be available if already booked but quantity <= conditional capacity' do
         booker = create(:booker)
-        @bookable.be_booked!(booker, amount: 2)
-        (1..(@bookable.capacity - 2)).each do |amount|
-          expect(@bookable.check_availability(amount: amount)).to be_truthy
-          expect(@bookable.check_availability!(amount: amount)).to be_truthy
+        @bookable.be_booked!(booker, quantity: 2)
+        (1..(@bookable.capacity - 2)).each do |quantity|
+          expect(@bookable.check_availability(quantity: quantity)).to be_truthy
+          expect(@bookable.check_availability!(quantity: quantity)).to be_truthy
         end
       end
 
-      it 'should not be available if amount <= capacity but already booked and amount > conditional capacity' do
+      it 'should not be available if quantity <= capacity but already booked and quantity > conditional capacity' do
         booker = create(:booker)
-        @bookable.be_booked!(booker, amount: 2)
-        amount = @bookable.capacity - 2 + 1
-        expect(@bookable.check_availability(amount: amount)).to be_falsy
-        expect { @bookable.check_availability!(amount: amount) }.to raise_error ActsAsBookable::AvailabilityError
+        @bookable.be_booked!(booker, quantity: 2)
+        quantity = @bookable.capacity - 2 + 1
+        expect(@bookable.check_availability(quantity: quantity)).to be_falsy
+        expect { @bookable.check_availability!(quantity: quantity) }.to raise_error ActsAsBookable::AvailabilityError
         begin
-          @bookable.check_availability!(amount: amount)
+          @bookable.check_availability!(quantity: quantity)
         rescue ActsAsBookable::AvailabilityError => e
           expect(e.message).to include 'is fully booked'
         end
       end
 
-      it 'should be available if amount <= capacity and already booked and amount > conditional capacity but overlappings are separated in time and space' do
+      it 'should be available if quantity <= capacity and already booked and quantity > conditional capacity but overlappings are separated in time and space' do
         Bookable.booking_opts = {
           time_type: :range,
           capacity_type: :open,
@@ -271,14 +271,14 @@ describe 'Bookable model' do
         @bookable.schedule.add_recurrence_rule IceCube::Rule.daily
         @bookable.save!
         booker = create(:booker)
-        @bookable.be_booked!(booker, amount: 3, start_time: Date.today, end_time: Date.today + 8.hours)
-        @bookable.be_booked!(booker, amount: 3, start_time: Date.today + 8.hours, end_time: Date.today + 16.hours)
-        @bookable.be_booked!(booker, amount: 3, start_time: Date.today + 16.hours, end_time: Date.today + 24.hours)
-        amount = 1
-        expect(@bookable.check_availability(amount: amount, start_time: Date.today, end_time: Date.today + 24.hours)).to be_truthy
+        @bookable.be_booked!(booker, quantity: 3, start_time: Date.today, end_time: Date.today + 8.hours)
+        @bookable.be_booked!(booker, quantity: 3, start_time: Date.today + 8.hours, end_time: Date.today + 16.hours)
+        @bookable.be_booked!(booker, quantity: 3, start_time: Date.today + 16.hours, end_time: Date.today + 24.hours)
+        quantity = 1
+        expect(@bookable.check_availability(quantity: quantity, start_time: Date.today, end_time: Date.today + 24.hours)).to be_truthy
       end
 
-      it 'should not be available if amount <= capacity and already booked and amount > conditional capacity' do
+      it 'should not be available if quantity <= capacity and already booked and quantity > conditional capacity' do
         Bookable.booking_opts = {
           time_type: :range,
           capacity_type: :open,
@@ -289,14 +289,14 @@ describe 'Bookable model' do
         @bookable.schedule.add_recurrence_rule IceCube::Rule.daily
         @bookable.save!
         booker = create(:booker)
-        @bookable.be_booked!(booker, amount: 3, start_time: Date.today, end_time: Date.today + 8.hours)
-        @bookable.be_booked!(booker, amount: 3, start_time: Date.today + 8.hours, end_time: Date.today + 16.hours)
-        @bookable.be_booked!(booker, amount: 1, start_time: Date.today + 8.hours, end_time: Date.today + 24.hours)
-        amount = 2
-        expect(@bookable.check_availability(amount: amount, start_time: Date.today, end_time: Date.today + 8.hours)).to be_truthy
-        expect(@bookable.check_availability(amount: amount, start_time: Date.today + 8.hours, end_time: Date.today + 16.hours)).to be_truthy
-        expect(@bookable.check_availability(amount: amount, start_time: Date.today + 16.hours, end_time: Date.today + 24.hours)).to be_truthy
-        expect(@bookable.check_availability(amount: amount, start_time: Date.today, end_time: Date.today + 24.hours)).to be_truthy
+        @bookable.be_booked!(booker, quantity: 3, start_time: Date.today, end_time: Date.today + 8.hours)
+        @bookable.be_booked!(booker, quantity: 3, start_time: Date.today + 8.hours, end_time: Date.today + 16.hours)
+        @bookable.be_booked!(booker, quantity: 1, start_time: Date.today + 8.hours, end_time: Date.today + 24.hours)
+        quantity = 2
+        expect(@bookable.check_availability(quantity: quantity, start_time: Date.today, end_time: Date.today + 8.hours)).to be_truthy
+        expect(@bookable.check_availability(quantity: quantity, start_time: Date.today + 8.hours, end_time: Date.today + 16.hours)).to be_truthy
+        expect(@bookable.check_availability(quantity: quantity, start_time: Date.today + 16.hours, end_time: Date.today + 24.hours)).to be_truthy
+        expect(@bookable.check_availability(quantity: quantity, start_time: Date.today, end_time: Date.today + 24.hours)).to be_truthy
       end
     end
 
@@ -310,33 +310,33 @@ describe 'Bookable model' do
         @bookable = Bookable.create!(name: 'bookable', capacity: 4)
       end
 
-      it 'should be available if amount <= capacity' do
-        (1..@bookable.capacity).each do |amount|
-          expect(@bookable.check_availability(amount: amount)).to be_truthy
-          expect(@bookable.check_availability!(amount: amount)).to be_truthy
+      it 'should be available if quantity <= capacity' do
+        (1..@bookable.capacity).each do |quantity|
+          expect(@bookable.check_availability(quantity: quantity)).to be_truthy
+          expect(@bookable.check_availability!(quantity: quantity)).to be_truthy
         end
       end
 
-      it 'should not be available if amount > capacity' do
-        expect(@bookable.check_availability(amount: @bookable.capacity + 1)).to be_falsy
-        expect { @bookable.check_availability!(amount: @bookable.capacity + 1) }.to raise_error ActsAsBookable::AvailabilityError
+      it 'should not be available if quantity > capacity' do
+        expect(@bookable.check_availability(quantity: @bookable.capacity + 1)).to be_falsy
+        expect { @bookable.check_availability!(quantity: @bookable.capacity + 1) }.to raise_error ActsAsBookable::AvailabilityError
         begin
-          @bookable.check_availability!(amount: @bookable.capacity + 1)
+          @bookable.check_availability!(quantity: @bookable.capacity + 1)
         rescue ActsAsBookable::AvailabilityError => e
           expect(e.message).to include 'cannot be greater'
         end
       end
 
-      it 'should not be available if already booked (even though amount < capacity - overlapped amounts)' do
+      it 'should not be available if already booked (even though quantity < capacity - overlapped quantitys)' do
         booker = create(:booker)
-        @bookable.be_booked!(booker, amount: 1)
-        (1..(@bookable.capacity + 1)).each do |amount|
-          expect(@bookable.check_availability(amount: amount)).to be_falsy
-          expect { @bookable.check_availability!(amount: amount) }.to raise_error ActsAsBookable::AvailabilityError
+        @bookable.be_booked!(booker, quantity: 1)
+        (1..(@bookable.capacity + 1)).each do |quantity|
+          expect(@bookable.check_availability(quantity: quantity)).to be_falsy
+          expect { @bookable.check_availability!(quantity: quantity) }.to raise_error ActsAsBookable::AvailabilityError
           begin
-            @bookable.check_availability!(amount: amount)
+            @bookable.check_availability!(quantity: quantity)
           rescue ActsAsBookable::AvailabilityError => e
-            if(amount <= @bookable.capacity)
+            if(quantity <= @bookable.capacity)
               expect(e.message).to include('is fully booked')
             else
               expect(e.message).to include('cannot be greater')
@@ -547,15 +547,15 @@ describe 'Bookable model' do
           before(:each) do
             Bookable.booking_opts[:capacity_type] = :open
             Bookable.initialize_acts_as_bookable_core
-            @opts[:amount] = 2
+            @opts[:quantity] = 2
           end
 
           it 'validates with all options fields set' do
             expect(Bookable.validate_booking_options!(@opts)).to be_truthy
           end
 
-          it 'requires :amount as integer' do
-            @opts[:amount] = nil
+          it 'requires :quantity as integer' do
+            @opts[:quantity] = nil
             expect{ Bookable.validate_booking_options!(@opts) }.to raise_error ActsAsBookable::OptionsInvalid
           end
         end
@@ -564,15 +564,15 @@ describe 'Bookable model' do
           before(:each) do
             Bookable.booking_opts[:capacity_type] = :closed
             Bookable.initialize_acts_as_bookable_core
-            @opts[:amount] = 2
+            @opts[:quantity] = 2
           end
 
           it 'validates with all options fields set' do
             expect(Bookable.validate_booking_options!(@opts)).to be_truthy
           end
 
-          it 'requires :amount as integer' do
-            @opts[:amount] = nil
+          it 'requires :quantity as integer' do
+            @opts[:quantity] = nil
             expect{ Bookable.validate_booking_options!(@opts) }.to raise_error ActsAsBookable::OptionsInvalid
           end
         end
@@ -582,8 +582,8 @@ describe 'Bookable model' do
             Bookable.initialize_acts_as_bookable_core
           end
 
-          it 'doesn\'t accept amount' do
-            @opts[:amount] = 2.3
+          it 'doesn\'t accept quantity' do
+            @opts[:quantity] = 2.3
             expect{ Bookable.validate_booking_options!(@opts) }.to raise_error ActsAsBookable::OptionsInvalid
           end
         end

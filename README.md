@@ -84,7 +84,7 @@ Available options (with values) are:
   * `:none`
   * `:fixed`
   * `:range`
-* `:capacity_type`: Specifies how the `amount` of a booking (e.g. number of people of a restaurant reservation) affects the future availability of the bookable. Allowed values are:
+* `:capacity_type`: Specifies how the `quantity` of a booking (e.g. number of people of a restaurant reservation) affects the future availability of the bookable. Allowed values are:
   * `:none`
   * `:open`
   * `:closed`
@@ -307,7 +307,7 @@ check_out_wrong = check_in_wrong + 3.days
 
 ### Capacity constraints
 
-The option `capacity_type` may be used to set a constraint over the `amount` attribute of the booking
+The option `capacity_type` may be used to set a constraint over the `quantity` attribute of the booking
 
 #### No capacity constraints - `capacity_type: :none`
 
@@ -347,10 +347,10 @@ Each instance of the model must define its capacity.
 **Booking**
 
 ```ruby
-# Booking a model with `capacity_type: :open` requires `:amount`
-@user1.book! @event, amount: 5 # booking the event for 5 people, OK
-@user2.book! @event, amount: 20 # booking the event for other 20 people, OK
-@user3.book! @event, amount: 10 # overbooking! raise ActsAsBookable::AvailabilityError
+# Booking a model with `capacity_type: :open` requires `:quantity`
+@user1.book! @event, quantity: 5 # booking the event for 5 people, OK
+@user2.book! @event, quantity: 20 # booking the event for other 20 people, OK
+@user3.book! @event, quantity: 10 # overbooking! raise ActsAsBookable::AvailabilityError
 ```
 
 #### Closed capacity - `capacity_type: :closed`
@@ -380,10 +380,10 @@ Each instance of the model must define its capacity.
 **Booking**
 
 ```ruby
-# Booking a model with `capacity_type: :closed` requires `:amount`
-@user1.book! @private_room, amount: 35 # overbooking! raise ActsAsBookable::AvailabilityError
-@user2.book! @private_room, amount: 5 # booking for 5 people, OK
-@user3.book! @private_room, amount: 5 # not available! Although the room can still hosts (potentially) 25 people, it has already been booked. raise ActsAsBookable::AvailabilityError
+# Booking a model with `capacity_type: :closed` requires `:quantity`
+@user1.book! @private_room, quantity: 35 # overbooking! raise ActsAsBookable::AvailabilityError
+@user2.book! @private_room, quantity: 5 # booking for 5 people, OK
+@user3.book! @private_room, quantity: 5 # not available! Although the room can still hosts (potentially) 25 people, it has already been booked. raise ActsAsBookable::AvailabilityError
 
 ```
 
@@ -435,7 +435,7 @@ end
 
 ```ruby
 # A @user books a @room for 2 people. Check-in is today and check-out is tomorrow.
-@user.book! @room, start_time: Date.today, end_time: Date.tomorrow, amount: 2
+@user.book! @room, start_time: Date.today, end_time: Date.tomorrow, quantity: 2
 ```
 
 ## FYI

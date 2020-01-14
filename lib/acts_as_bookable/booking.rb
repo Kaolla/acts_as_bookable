@@ -5,18 +5,35 @@ module ActsAsBookable
   class Booking < ::ActiveRecord::Base
     self.table_name = 'acts_as_bookable_bookings'
 
-    enum status: [:draft, :pending, :accepted, :rejected, :paid, :refunded]
+    enum status: [:draft, :pending, :accepted, :rejected, :paid, :refunded, :completed]
     belongs_to :bookable, polymorphic: true
     belongs_to :booker,   polymorphic: true
-    
+
     validates_presence_of :bookable
     validates_presence_of :booker
     validate  :bookable_must_be_bookable,
               :booker_must_be_booker
 
-    validates :amount, numericality: { only_interger: true, greater_than: 0 }
+    validates :quantity, numericality: { only_interger: true, greater_than: 0 }
 
-    scope :saved, -> { where.not(status: "draft") }
+    ##
+    # Handy scopes for bookings
+    #
+    # Status
+    scope :saved,       -> { where.not(status: 'draft') }
+    scope :draft,       -> { where(status: 'draft') }
+    scope :pending,     -> { where(status: 'pending') }
+    scope :accepted,    -> { where(status: 'accepted') }
+    scope :rejected,    -> { where(status: 'rejected') }
+    scope :paid,        -> { where(status: 'paid') }
+    scope :refunded,    -> { where(status: 'refunded') }
+    scope :completed,   -> { where(status: 'completed') }
+    # Time
+    scope :weekly, -> { saved.completed.where(created_at: Time.now.last_week..Time.now) }
+    scope :monthly, -> { saved.completed.where(created_at: Time.now.last_month..Time.now) }
+    scope :quarterly, -> { saved.completed.where(created_at: Time.now.months_ago(3)..Time.now) }
+    scope :half_yearly, -> { saved.completed.where(created_at: Time.now.months_ago(6)..Time.now) }
+    scope :yearly, -> { saved.completed.where(created_at: Time.now.years_ago(1)..Time.now) }
 
     ##
     # Retrieves overlapped bookings, given a bookable and some booking options
@@ -36,6 +53,21 @@ module ActsAsBookable
       end
       query
     }
+    
+      # ###### ###### ###### ###### ######
+      # Geocode
+      # ###### ###### ###### ###### ######
+      geocoded_by :address
+      before_validation :geocode, if: :will_save_change_to_address?
+      after_validation :geocode, if: :address_changed?
+
+      def address
+        [street, city, zipcode, state].compact.join(", ")
+      end
+
+      def address_changed?
+        street_changed? || city_changed? || zipcode_changed? || state_changed?
+      end
 
     private
       ##

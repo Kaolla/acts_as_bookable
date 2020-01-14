@@ -49,11 +49,11 @@ module ActsAsBookable::Bookable
         # Switch :capacity_type
         case self.booking_opts[:capacity_type]
         when :closed
-          required_params[:amount] = [Integer]
+          required_params[:quantity] = [Integer]
         when :open
-          required_params[:amount] = [Integer]
+          required_params[:quantity] = [Integer]
         when :none
-          unpermitted_params << :amount
+          unpermitted_params << :quantity
         end
 
         #
@@ -160,16 +160,15 @@ module ActsAsBookable::Bookable
       # @raise ActsAsBookable::AvailabilityError if the bookable is not available for given options
       #
       # Example:
-      #   @room.check_availability!(from: Date.today, to: Date.tomorrow, amount: 2)
+      #   @room.check_availability!(from: Date.today, to: Date.tomorrow, quantity: 2)
       def check_availability!(opts)
         # validates options
         self.validate_booking_options!(opts)
-
         # Capacity check (done first because it doesn't require additional queries)
         if self.booking_opts[:capacity_type] != :none
-          # Amount > capacity
-          if opts[:amount] > self.capacity
-            raise ActsAsBookable::AvailabilityError.new ActsAsBookable::T.er('.availability.amount_gt_capacity', model: self.class.to_s)
+          # quantity > capacity
+          if opts[:quantity] > self.capacity
+            raise ActsAsBookable::AvailabilityError.new ActsAsBookable::T.er('.availability.quantity_gt_capacity', model: self.class.to_s)
           end
         end
 
@@ -210,30 +209,30 @@ module ActsAsBookable::Bookable
         # Real capacity check (calculated with overlapped bookings)
         #
         overlapped = ActsAsBookable::Booking.overlapped(self, opts)
-        # If capacity_type is :closed cannot book if already booked (no matter if amount < capacity)
+        # If capacity_type is :closed cannot book if already booked (no matter if quantity < capacity)
         if (self.booking_opts[:capacity_type] == :closed && !overlapped.empty?)
           raise ActsAsBookable::AvailabilityError.new ActsAsBookable::T.er('.availability.already_booked', model: self.class.to_s)
         end
-        # if capacity_type is :open, check if amount <= maximum amount of overlapped booking
+        # if capacity_type is :open, check if quantity <= maximum quantity of overlapped booking
         if (self.booking_opts[:capacity_type] == :open && !overlapped.empty?)
-          # if time_type is :range, split in sub-intervals and check the maximum sum of amounts against capacity for each sub-interval
+          # if time_type is :range, split in sub-intervals and check the maximum sum of quantitys against capacity for each sub-interval
           if (self.booking_opts[:time_type] == :range)
-            # Map overlapped bookings to a set of intervals with amount
-            intervals = overlapped.map { |e| {start_time: e.start_time, end_time: e.end_time, amount: e.amount} }
+            # Map overlapped bookings to a set of intervals with quantity
+            intervals = overlapped.map { |e| {start_time: e.start_time, end_time: e.end_time, quantity: e.quantity} }
             # Make subintervals from overlapped bookings and check capacity for each of them
             ActsAsBookable::TimeUtils.subintervals(intervals) do |a,b,op|
               case op
               when :open
-                res = {amount: a[:amount] + b[:amount]}
+                res = {quantity: a[:quantity] + b[:quantity]}
               when :close
-                res = {amount: a[:amount] - b[:amount]}
+                res = {quantity: a[:quantity] - b[:quantity]}
               end
-              raise ActsAsBookable::AvailabilityError.new ActsAsBookable::T.er('.availability.already_booked', model: self.class.to_s) if (res[:amount] > self.capacity)
+              raise ActsAsBookable::AvailabilityError.new ActsAsBookable::T.er('.availability.already_booked', model: self.class.to_s) if (res[:quantity] > self.capacity)
               res
             end
-          # else, just sum the amounts (fixed times are not intervals and they overlap if are the same)
+          # else, just sum the quantitys (fixed times are not intervals and they overlap if are the same)
           else
-            if(overlapped.sum(:amount) + opts[:amount] > self.capacity && self.accepted?)
+            if(overlapped.sum(:quantity) + opts[:quantity] > self.capacity)
               raise ActsAsBookable::AvailabilityError.new ActsAsBookable::T.er('.availability.already_booked', model: self.class.to_s)
             end
           end
@@ -248,7 +247,7 @@ module ActsAsBookable::Bookable
       # @return true if the bookable is available for given options, otherwise return false
       #
       # Example:
-      #   @room.check_availability!(from: Date.today, to: Date.tomorrow, amount: 2)
+      #   @room.check_availability!(from: Date.today, to: Date.tomorrow, quantity: 2)
       def check_availability(opts)
         begin
           check_availability!(opts)
@@ -265,7 +264,7 @@ module ActsAsBookable::Bookable
       # @param opts The booking options
       #
       # Example:
-      #   @room.be_booked!(@user, from: Date.today, to: Date.tomorrow, amount: 2)
+      #   @room.be_booked!(@user, from: Date.today, to: Date.tomorrow, quantity: 2)
       def be_booked!(booker, opts={})
         booker.book!(self, opts)
       end

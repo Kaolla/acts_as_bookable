@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe 'Booking model' do
   before(:each) do
-    @booking = ActsAsBookable::Booking.new(amount: 2)
+    @booking = ActsAsBookable::Booking.new(quantity: 2)
     @booker = create(:booker)
     @bookable = create(:bookable)
     @booking.booker = @booker

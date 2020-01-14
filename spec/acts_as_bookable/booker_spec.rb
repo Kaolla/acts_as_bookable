@@ -47,17 +47,17 @@ describe 'Booker model' do
 
     it 'should create a new booking' do
       count = @booker.bookings.count
-      new_booking = @booker.book!(@bookable, start_time: Date.today, end_time: Date.today + 1.day, amount: 2)
+      new_booking = @booker.book!(@bookable, start_time: Date.today, end_time: Date.today + 1.day, quantity: 2)
       expect(@booker.bookings.count).to eq count+1
       expect(new_booking.class.to_s).to eq "ActsAsBookable::Booking"
     end
 
     it 'new booking should have all fields set' do
-      new_booking = @booker.book!(@bookable, start_time: Date.today, end_time: Date.today + 1.day, amount: 2)
+      new_booking = @booker.book!(@bookable, start_time: Date.today, end_time: Date.today + 1.day, quantity: 2)
       new_booking.reload
       expect(new_booking.start_time).to be_present
       expect(new_booking.end_time).to be_present
-      expect(new_booking.amount).to be_present
+      expect(new_booking.quantity).to be_present
     end
 
     it 'should raise ActiveRecord::RecordInvalid if new booking is not valid' do
@@ -74,8 +74,8 @@ describe 'Booker model' do
     end
 
     it 'should raise ActsAsBookable::AvailabilityError if the bookable is not available' do
-      @booker.book!(@bookable, start_time: Date.today, end_time: Date.today + 1.day, amount: 2)
-      expect{ @booker.book!(@bookable, start_time: Date.today, end_time: Date.today + 1.day, amount: 2)}.to raise_error ActsAsBookable::AvailabilityError
+      @booker.book!(@bookable, start_time: Date.today, end_time: Date.today + 1.day, quantity: 2)
+      expect{ @booker.book!(@bookable, start_time: Date.today, end_time: Date.today + 1.day, quantity: 2)}.to raise_error ActsAsBookable::AvailabilityError
     end
   end
 
