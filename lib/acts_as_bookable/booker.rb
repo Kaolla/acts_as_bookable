@@ -45,7 +45,7 @@ module ActsAsBookable
 
         # create the new booking
         booking_params = opts.merge({booker: self, bookable: bookable})
-        booking = ActsAsBookable::Booking.create!(booking_params)
+        booking = ActsAsBookable::Booking.create(booking_params)
 
         # reload the bookable to make changes available
         bookable.reload
