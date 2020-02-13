@@ -20,15 +20,16 @@ module ActsAsBookable
     # Handy scopes for bookings
     #
     # Status
-    scope :saved,       -> { where.not(status: 'draft') }
-    scope :draft,       -> { where(status: 'draft') }
-    scope :pending,     -> { where(status: 'pending') }
-    scope :accepted,    -> { where(status: 'accepted') }
-    scope :rejected,    -> { where(status: 'rejected') }
-    scope :completed,   -> { where(status: 'completed') }
-    scope :confirmed,   -> { where(confirmed: 'true') }
-    scope :paid,        -> { where(paid: 'true') }
-    scope :refunded,    -> { where(refunded: 'true') }
+    scope :saved,         -> { where.not(status: 'draft') }
+    scope :draft,         -> { where(status: 'draft') }
+    scope :pending,       -> { where(status: 'pending') }
+    scope :accepted,      -> { where(status: 'accepted') }
+    scope :rejected,      -> { where(status: 'rejected') }
+    scope :completed,     -> { where(status: 'completed') }
+    scope :not_completed, -> { paid.where.not(status: 'completed', refunded: 'true') }
+    scope :confirmed,     -> { where(confirmed: 'true') }
+    scope :paid,          -> { where(paid: 'true') }
+    scope :refunded,      -> { where(refunded: 'true') }
     # Time
     scope :weekly, -> { saved.completed.where(created_at: Time.now.last_week..Time.now) }
     scope :monthly, -> { saved.completed.where(created_at: Time.now.last_month..Time.now) }

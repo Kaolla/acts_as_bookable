@@ -10,7 +10,6 @@ class CreateActsAsBookableBookings < ActiveRecord::Migration[6.0]
       t.column :start_time, :datetime
       t.column :end_time, :datetime
       t.column :time, :datetime
-      t.column :message, :text
       t.column :extra_billing_info, :string
       t.column :street, :string
       t.column :extra_address_field, :string
