@@ -5,7 +5,7 @@ module ActsAsBookable
   class Booking < ::ActiveRecord::Base
     self.table_name = 'acts_as_bookable_bookings'
 
-    enum status: [:draft, :pending, :accepted, :rejected, :completed]
+    enum status: [:draft, :pending, :rejected, :accepted, :paid, :cancelled, :completed]
     belongs_to :bookable, polymorphic: true
     belongs_to :booker,   polymorphic: true
 
@@ -23,12 +23,13 @@ module ActsAsBookable
     scope :saved,         -> { where.not(status: 'draft') }
     scope :draft,         -> { where(status: 'draft') }
     scope :pending,       -> { where(status: 'pending') }
-    scope :accepted,      -> { where(status: 'accepted') }
     scope :rejected,      -> { where(status: 'rejected') }
+    scope :accepted,      -> { where(status: 'accepted') }
+    scope :paid,          -> { where(status: 'paid') }
+    scope :cancelled,     -> { where(status: 'cancelled') }
     scope :completed,     -> { where(status: 'completed') }
     scope :not_completed, -> { paid.where.not(status: 'completed', refunded: 'true') }
     scope :confirmed,     -> { where(confirmed: 'true') }
-    scope :paid,          -> { where(paid: 'true') }
     scope :refunded,      -> { where(refunded: 'true') }
     # Time
     scope :weekly, -> { saved.completed.where(created_at: Time.now.last_week..Time.now) }

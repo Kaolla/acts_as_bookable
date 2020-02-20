@@ -20,8 +20,9 @@ class CreateActsAsBookableBookings < ActiveRecord::Migration[6.0]
       t.column :latitude, :float
       t.column :longitude, :float
       t.column :confirmed, :boolean
-      t.column :paid, :boolean
       t.column :refunded, :boolean
+      t.datetime :paid_at
+      t.datetime :refunded_at
       t.datetime :created_at
     end
   end
