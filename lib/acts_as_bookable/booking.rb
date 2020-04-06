@@ -65,7 +65,7 @@ module ActsAsBookable
     after_validation :geocode, if: :address_changed?
 
     def address
-      [street, city, zipcode, state, country_code].compact.join(", ")
+      [street, city, zipcode, state, country, country_code].compact.join(", ")
     end
 
     def address_changed?
